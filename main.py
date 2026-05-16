@@ -129,15 +129,15 @@ def start_reminder(data: ReminderRequest):
     send_email(data.email)
 
     # # Send every hour
-    # job = scheduler.add_job(
-    #     send_email,
-    #     "interval",
-    #     minutes=1,
-    #     args=[data.email],
-    #     id=data.email,
-    # )
+    job = scheduler.add_job(
+        send_email,
+        "interval",
+        minutes=1,
+        args=[data.email],
+        id=data.email,
+    )
 
-    # jobs[data.email] = job
+    jobs[data.email] = job
 
     return {
         "message": f"Hourly water reminder started for {data.email}"
