@@ -6,6 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from email.message import EmailMessage
 import smtplib
 import os
+import resend
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,6 +22,13 @@ jobs = {}
 # Email Config
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
+resend.api_key = os.getenv("RESEND_API_KEY")
+
+SMTP_SERVER = "smtp-relay.brevo.com"
+SMTP_PORT = 587
+
+SMTP_LOGIN = os.getenv("BREVO_LOGIN")
+SMTP_PASSWORD = os.getenv("BREVO_PASSWORD")
 
 
 class ReminderRequest(BaseModel):
@@ -28,110 +36,85 @@ class ReminderRequest(BaseModel):
 
 
 def send_email(receiver_email: str):
-    try:
-        msg = EmailMessage()
 
-        msg["Subject"] = "💧 Drink Water Beautiful 💖"
-        msg["From"] = EMAIL
-        msg["To"] = receiver_email
+    msg = EmailMessage()
 
-        html_content = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body{
-              font-family: Arial, sans-serif;
-              background: linear-gradient(135deg,#ffd6e7,#d6f3ff);
-              padding:40px;
-              text-align:center;
-            }
+    msg["Subject"] = "💧 Drink Water Beautiful 💖"
+    msg["From"] = "mohammedowais6361@gmail.com"
+    msg["To"] = receiver_email
 
-            .card{
-              max-width:500px;
-              margin:auto;
-              background:white;
-              border-radius:25px;
-              padding:35px;
-              box-shadow:0 8px 25px rgba(0,0,0,0.12);
-            }
+    html = """
+    <div style="
+        font-family: Arial;
+        padding:40px;
+        text-align:center;
+        background: linear-gradient(135deg,#ffd6e7,#d6f3ff);
+    ">
 
-            .emoji{
-              font-size:70px;
-            }
+        <div style="
+            max-width:500px;
+            margin:auto;
+            background:white;
+            padding:35px;
+            border-radius:25px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.1);
+        ">
 
-            h1{
-              color:#ff4f81;
-              margin-top:10px;
-            }
+            <div style="font-size:70px;">💧</div>
 
-            p{
-              color:#444;
-              font-size:18px;
-              line-height:1.7;
-            }
+            <h1 style="color:#ff4f81;">
+                Hydration Reminder 💖
+            </h1>
 
-            .btn{
-              display:inline-block;
-              margin-top:20px;
-              padding:14px 28px;
-              border-radius:50px;
-              background: linear-gradient(135deg,#4facfe,#00f2fe);
-              color:white !important;
-              text-decoration:none;
-              font-weight:bold;
-              font-size:16px;
-            }
+            <p style="
+                font-size:18px;
+                color:#444;
+                line-height:1.8;
+            ">
+                Hii Babu Jaan 🌸 <br><br>
 
-            .footer{
-              margin-top:25px;
-              color:#888;
-              font-size:14px;
-            }
-          </style>
-        </head>
+                Time to drink some water 💧 <br>
 
-        <body>
-
-          <div class="card">
-
-            <div class="emoji">💧</div>
-
-            <h1>Hydration Reminder 💖</h1>
-
-            <p>
-              Hii Babu Jaan 🌸 <br><br>
-
-              Time to drink some water 💧 <br>
-
-              Stay healthy, glowing and cute always ✨
+                Stay healthy, glowing and cute always ✨
             </p>
 
-            <a class="btn">
-              Drink Water Now 🥤
-            </a>
-
-            <div class="footer">
-              Sent with love every 💕
+            <div style="
+                margin-top:25px;
+                font-size:14px;
+                color:#777;
+            ">
+                Sent with love 💕
+            </div>
+            <div style="
+                margin-top:10px;
+                font-size:14px;
+                color:#777;
+            ">
+                Yours and only yours,
+            </div>
+            <div style="
+                margin-top:5px;
+                font-size:14px;
+                color:#777;
+            ">
+                Owiii
             </div>
 
-          </div>
+        </div>
 
-        </body>
-        </html>
-        """
+    </div>
+    """
 
-        msg.set_content("Drink water 💧")
+    msg.set_content("Drink water 💧")
+    msg.add_alternative(html, subtype="html")
 
-        # HTML Email
-        msg.add_alternative(html_content, subtype="html")
-
-        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
             smtp.starttls()
-            smtp.login(EMAIL, PASSWORD)
+            smtp.login(SMTP_LOGIN, SMTP_PASSWORD)
             smtp.send_message(msg)
 
-        print(f"HTML email sent to {receiver_email}")
+        print(f"Email sent to {receiver_email}")
 
     except Exception as e:
         print("Error sending email:", e)
