@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+apscheduler
+python-dotenv
+email-validator
