@@ -132,7 +132,7 @@ def start_reminder(data: ReminderRequest):
     job = scheduler.add_job(
         send_email,
         "interval",
-        minutes=1,
+        hours=1,
         args=[data.email],
         id=data.email,
     )
