@@ -6,7 +6,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from email.message import EmailMessage
 import smtplib
 import os
-import resend
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,7 +21,6 @@ jobs = {}
 # Email Config
 EMAIL = os.getenv("EMAIL")
 PASSWORD = os.getenv("PASSWORD")
-resend.api_key = os.getenv("RESEND_API_KEY")
 
 SMTP_SERVER = "smtp-relay.brevo.com"
 SMTP_PORT = 587
