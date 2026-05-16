@@ -6,6 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from email.message import EmailMessage
 import smtplib
 import os
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,6 +28,7 @@ SMTP_PORT = 587
 
 SMTP_LOGIN = os.getenv("BREVO_LOGIN")
 SMTP_PASSWORD = os.getenv("BREVO_PASSWORD")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 
 
 class ReminderRequest(BaseModel):
@@ -35,13 +37,15 @@ class ReminderRequest(BaseModel):
 
 def send_email(receiver_email: str):
 
-    msg = EmailMessage()
+    url = "https://api.brevo.com/v3/smtp/email"
 
-    msg["Subject"] = "💧 Drink Water Beautiful 💖"
-    msg["From"] = "mohammedowais6361@gmail.com"
-    msg["To"] = receiver_email
+    headers = {
+        "accept": "application/json",
+        "api-key": BREVO_API_KEY,
+        "content-type": "application/json"
+    }
 
-    html = """
+    html_content = """
     <div style="
         font-family: Arial;
         padding:40px;
@@ -78,23 +82,11 @@ def send_email(receiver_email: str):
 
             <div style="
                 margin-top:25px;
+                color:#888;
                 font-size:14px;
-                color:#777;
             ">
-                Sent with love 💕
-            </div>
-            <div style="
-                margin-top:10px;
-                font-size:14px;
-                color:#777;
-            ">
-                Yours and only yours,
-            </div>
-            <div style="
-                margin-top:5px;
-                font-size:14px;
-                color:#777;
-            ">
+                Sent with love 💕</br>
+                Yours and only yours,</br>
                 Owiii
             </div>
 
@@ -103,19 +95,29 @@ def send_email(receiver_email: str):
     </div>
     """
 
-    msg.set_content("Drink water 💧")
-    msg.add_alternative(html, subtype="html")
+    payload = {
+        "sender": {
+            "name": "Owais 💖",
+            "email": "mohammedowais6361@gmail.com"
+        },
+        "to": [
+            {
+                "email": receiver_email
+            }
+        ],
+        "subject": "💧 Drink Water Beautiful",
+        "htmlContent": html_content
+    }
 
-    try:
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
-            smtp.starttls()
-            smtp.login(SMTP_LOGIN, SMTP_PASSWORD)
-            smtp.send_message(msg)
+    response = requests.post(
+        url,
+        json=payload,
+        headers=headers,
+        timeout=10
+    )
 
-        print(f"Email sent to {receiver_email}")
-
-    except Exception as e:
-        print("Error sending email:", e)
+    print(response.status_code)
+    print(response.text)
 
 
 @app.post("/start-reminder")
